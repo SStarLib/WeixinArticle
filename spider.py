@@ -1,7 +1,9 @@
 from urllib.parse import urlencode
+import pymongo
 from requests.exceptions import ConnectionError
 import requests
 from pyquery import PyQuery as pq
+from config import *
 
 
 class weixin:
@@ -19,9 +21,11 @@ class weixin:
             'Upgrade-Insecure-Requests': '1',
         }
         self.url = url
-        self.proxy_url = 'http://127.0.0.1:5010/get/'
+        self.proxy_url = PROXY_URL
         self.proxy = None
-        self.MaxCount = 5
+        self.MaxCount = MAX_COUNT
+        client=pymongo.MongoClient(MONGO_URI)
+        self.db=client[MONGO_DB]
 
     # 获取文章的url
     def get_html(self, count=1):
@@ -104,15 +108,20 @@ class weixin:
         content = data('#js_content').text()
         nickname = data('#js_name').text()
         date = data('#publish_time').text()
-        qrcode = data('#js_pc_qr_code_img').text()
-
+        weNum = data('#js_profile_qrcode > div > p:nth-child(3) > span').text()
         return {
             'title': title,
             'content': content,
             'date': date,
             'nickname': nickname,
-            'qrcode': qrcode,
+            'weNum': weNum,
         }
+    #保存到MongoDB数据库
+    def save_mongo(self):
+        if self.db['articles'].update({'title':self.data['title']},{'$set':self.data},True):
+            print('Saved to mongo',self.data['title'])
+        else:
+            print('Saved to Mongo Failed',self.data['title'])
 
     def search_article(self):
         html = self.get_html()
@@ -120,16 +129,16 @@ class weixin:
             for ar_url in self.parse_html(html):
                 text = self.get_article(ar_url)
                 info = self.parse_article(text)
-                print(info)
+                if info:
+                    self.save_mongo(info)
+
         else:
             print('未获取到网页信息')
 
 
 if __name__ == '__main__':
     base_url = 'http://weixin.sogou.com/weixin?'
-    keyword = '机器学习'
-    # for page in range(1,51):
-    #     wx=weixin(base_url,keyword,page)
-    #     wx.search_article()
-    wx = weixin(base_url, keyword)
-    wx.search_article()
+    for page in range(1,51):
+        wx=weixin(base_url,KEYWORD,page)
+        wx.search_article()
+
