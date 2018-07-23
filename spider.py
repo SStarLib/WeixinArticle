@@ -96,12 +96,26 @@ class weixin:
             return None
     def parse_article(self,text):
         data = pq(text)
-        print(data)
+        title=data('#activity-name').text()
+        content=data('#js_content').text()
+        nickname=data('#js_name').text()
+        date=data('#publish_time').text()
+        qrcode=data('#js_pc_qr_code_img').text()
+
+        return {
+            'title':title,
+            'content':content,
+            'date':date,
+            'nickname':nickname,
+            'qrcode':qrcode,
+        }
 
     def search_article(self):
         html = self.get_html()
         for ar_url in self.parse_html(html):
             text=self.get_article(ar_url)
+            info=self.parse_article(text)
+            print(info)
 
 
 
