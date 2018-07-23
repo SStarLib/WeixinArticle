@@ -77,7 +77,7 @@ class weixin:
         :return: 生成器：文章url
         '''
         data = pq(html)
-        items=data('#main > div.news-box > ul li .txt-box h3 a').items()
+        items = data('#main > div.news-box > ul li .txt-box h3 a').items()
         for item in items:
             yield item.attr('href')
 
