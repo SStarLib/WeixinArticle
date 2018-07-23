@@ -105,7 +105,7 @@ class weixin:
     def parse_article(self, text):
         data = pq(text)
         title = data('#activity-name').text()
-        content = data('#js_content').text()
+        content = data('#js_content').text().replace('\n','').strip()
         nickname = data('#js_name').text()
         date = data('#publish_time').text()
         weNum = data('#js_profile_qrcode > div > p:nth-child(3) > span').text()
