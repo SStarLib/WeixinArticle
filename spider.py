@@ -117,11 +117,11 @@ class weixin:
             'weNum': weNum,
         }
     #保存到MongoDB数据库
-    def save_mongo(self):
-        if self.db['articles'].update({'title':self.data['title']},{'$set':self.data},True):
-            print('Saved to mongo',self.data['title'])
+    def save_mongo(self,info):
+        if self.db['articles'].update({'title':info['title']},{'$set':info},True):
+            print('Saved to mongo',info['title'])
         else:
-            print('Saved to Mongo Failed',self.data['title'])
+            print('Saved to Mongo Failed',info['title'])
 
     def search_article(self):
         html = self.get_html()
