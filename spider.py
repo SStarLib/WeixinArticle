@@ -37,7 +37,7 @@ class weixin:
         try:
             if self.proxy:
                 proxies={
-                    "http": "http://{}".format(str(self.proxy).strip()),
+                    "http": "http://{}".format(self.proxy.strip()),
                 }
                 respone=requests.get(url,allow_redirects=False,headers=self.headers,proxies=proxies)
             else:
@@ -66,7 +66,7 @@ class weixin:
         try:
             response=requests.get(self.proxy_url)
             if response.status_code==200:
-                return response.content
+                return response.text
             return None
         except ConnectionError:
             return None
