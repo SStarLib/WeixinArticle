@@ -17,7 +17,7 @@ class weixin:
             'Upgrade-Insecure-Requests':'1',
         }
         self.url=url
-        self.proxy_url='http://localhost:5555/random'
+        self.proxy_url='http://127.0.0.1:5010/get/'
         self.proxy=None
         self.MaxCount=5
 
