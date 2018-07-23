@@ -129,6 +129,7 @@ class weixin:
             for ar_url in self.parse_html(html):
                 text = self.get_article(ar_url)
                 info = self.parse_article(text)
+                print(info)
                 if info:
                     self.save_mongo(info)
 
