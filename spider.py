@@ -1,8 +1,9 @@
 from urllib.parse import urlencode
 from requests.exceptions import ConnectionError
 import requests
+from pyquery import PyQuery as pq
 class weixin:
-    def __init__(self,url,keyword,page):
+    def __init__(self,url,keyword,page=1):
         self.data ={
             'query': keyword,
             'type': '2',
@@ -20,7 +21,13 @@ class weixin:
         self.proxy=None
         self.MaxCount=5
 
+    #获取文章的url
     def get_html(self,count=1):
+        '''
+        从搜狗搜索上抓取微信文章网页信息
+        :param count: 连接失败最大尝试次数
+        :return: 返回网页内容
+        '''
         queries=urlencode(self.data)
         url=self.url+queries
 
@@ -51,8 +58,11 @@ class weixin:
             proxy = self.get_proxy()
             count+=1
             return self.get_html(count)
-
     def get_proxy(self):
+        '''
+        获取代理
+        :return: 代理
+        '''
         try:
             response=requests.get(self.proxy_url)
             if response.status_code==200:
@@ -60,12 +70,46 @@ class weixin:
             return None
         except ConnectionError:
             return None
+    def parse_html(self,html):
+        '''
+        pyquery获取微信文章的url
+        :param html: 网页文本内容
+        :return: 生成器：文章url
+        '''
+        data = pq(html)
+        items=data('#main > div.news-box > ul li .txt-box h3 a').items()
+        for item in items:
+            yield item.attr('href')
+
+    #通过文章的url获取文章内容
+    def get_article(self,url):
+        '''
+        :param url: 文章url
+        :return: 网页内容
+        '''
+        try:
+            response=requests.get(url)
+            if response.status_code==200:
+                return response.text
+            return None
+        except ConnectionError:
+            return None
+    def parse_article(self,text):
+        data = pq(text)
+        print(data)
+
+    def search_article(self):
+        html = self.get_html()
+        for ar_url in self.parse_html(html):
+            text=self.get_article(ar_url)
+
 
 
 if __name__ == '__main__':
     base_url = 'http://weixin.sogou.com/weixin?'
     keyword='机器学习'
-    for page in range(1,51):
-        wx=weixin(base_url,keyword,page)
-        html=wx.get_html()
-        print(html)
+    # for page in range(1,51):
+    #     wx=weixin(base_url,keyword,page)
+    #     wx.search_article()
+    wx = weixin(base_url, keyword)
+    wx.search_article()
